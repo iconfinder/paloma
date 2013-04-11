@@ -22,7 +22,7 @@ tests_require = [
 setup(
     name='paloma',
     version='1.0.0-pre',
-    description='VAT validation for Python',
+    description='Class based e-mails for Django',
     author='Nick Bruun',
     author_email='nick@bruun.co',
     url='http://bruun.co/',
