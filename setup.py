@@ -21,7 +21,7 @@ tests_require = [
 
 setup(
     name='paloma',
-    version='1.0.0-pre',
+    version='1.0.0',
     description='Class based e-mails for Django',
     author='Nick Bruun',
     author_email='nick@bruun.co',
