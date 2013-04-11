@@ -194,6 +194,72 @@ class TemplateMailTestCase(TestCase):
         self.assertSimple(mail.outbox[-1],
                           body=u'Test body.\n\nHas variable in local context.')
 
+    def test_send__templated(self):
+        """TemplateMail(<templated>).send(..) sends expected e-mail
+        """
+
+        # Local context variable.
+        class TestMail(TemplateMail):
+            subject = 'Subject of the e-mail'
+            subject_template_name = 'test_mail_subject.txt'
+            text_template_name = 'test_mail.txt'
+            html_template_name = 'test_mail.html'
+
+        with self.assertMailsSent(1):
+            TestMail().send('test@example.com', {'a': 'in local context'})
+
+        body_format = u'Test body.\n\nHas variable %s.'
+        html_body_format = u'''<html>
+    <body>
+        <p>Test body.</p>
+        <p>Has variable %s.</p>
+    </body>
+</html>'''
+
+        self.assertSimple(
+            mail.outbox[-1],
+            subject=u'Test subject with variable in local context',
+            body=body_format % ('in local context'),
+            html_body=html_body_format % ('in local context')
+        )
+
+        # Class context variable.
+        class TestMail(TemplateMail):
+            subject = 'Subject of the e-mail'
+            subject_template_name = 'test_mail_subject.txt'
+            text_template_name = 'test_mail.txt'
+            html_template_name = 'test_mail.html'
+
+        with self.assertMailsSent(1):
+            TestMail(context={'a': 'in class context'}) \
+                .send('test@example.com')
+
+        self.assertSimple(
+            mail.outbox[-1],
+            subject=u'Test subject with variable in class context',
+            body=body_format % ('in class context'),
+            html_body=html_body_format % ('in class context')
+        )
+
+        # Class and local context variable.
+        class TestMail(TemplateMail):
+            subject = 'Subject of the e-mail'
+            subject_template_name = 'test_mail_subject.txt'
+            text_template_name = 'test_mail.txt'
+            html_template_name = 'test_mail.html'
+
+        with self.assertMailsSent(1):
+            TestMail(context={'a': 'in class context'}) \
+                .send('test@example.com',
+                      {'a': 'in local context'})
+
+        self.assertSimple(
+            mail.outbox[-1],
+            subject=u'Test subject with variable in local context',
+            body=body_format % ('in local context'),
+            html_body=html_body_format % ('in local context')
+        )
+
 
 __all__ = (
     'MailTestCase',
