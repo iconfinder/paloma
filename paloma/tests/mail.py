@@ -1,7 +1,12 @@
-from paloma import Mail
+import os
+from paloma import Mail, TemplateMail
 from django.core import mail
 from django.test.utils import override_settings
 from .testcase import TestCase
+
+
+TEMPLATE_DIRS = (os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                              'templates'), )
 
 
 @override_settings(DEFAULT_FROM_EMAIL='default@example.com',
@@ -119,6 +124,78 @@ class MailTestCase(TestCase):
         self.assertSimple(mail.outbox[-1], html_body=html_body)
 
 
+@override_settings(DEFAULT_FROM_EMAIL='default@example.com',
+                   DEFAULT_FROM_NAME='Default sender',
+                   TEMPLATE_DIRS=TEMPLATE_DIRS)
+class TemplateMailTestCase(TestCase):
+    """Test case for :class:`TemplateMail`.
+    """
+
+    def assertSimple(self, sent, body, **kwargs):
+        self.assertEqual(sent.subject,
+                         kwargs.pop('subject', 'Subject of the e-mail'))
+        self.assertEqual(sent.body, body)
+        from_email = kwargs.pop('from_email', 'default@example.com')
+        from_name = kwargs.pop('from_name', 'Default sender')
+        if from_name:
+            self.assertEqual(sent.from_email, '%s <%s>' % (from_name,
+                                                           from_email))
+        else:
+            self.assertEqual(sent.from_email, from_email)
+        self.assertEqual(len(sent.to), 1)
+        self.assertEqual(sent.to[0], kwargs.pop('to', 'test@example.com'))
+
+        html_alternatives = filter(lambda a: a[1] == 'text/html',
+                                   sent.alternatives)
+        self.assertEqual(any(html_alternatives), 'html_body' in kwargs)
+
+        if 'html_body' in kwargs:
+            html_body = kwargs.pop('html_body')
+            actual_html_body, mime_type = html_alternatives[0]
+            self.assertEqual(html_body, actual_html_body)
+
+    def test_send__only_text_template(self):
+        """TemplateMail(<only text template>).send(..) sends expected e-mail
+        """
+
+        # Local context variable.
+        class TestMail(TemplateMail):
+            subject = 'Subject of the e-mail'
+            text_template_name = 'test_mail.txt'
+
+        with self.assertMailsSent(1):
+            TestMail().send('test@example.com', {'a': 'in local context'})
+
+        self.assertSimple(mail.outbox[-1],
+                          body=u'Test body.\n\nHas variable in local context.')
+
+        # Class context variable.
+        class TestMail(TemplateMail):
+            subject = 'Subject of the e-mail'
+            text_template_name = 'test_mail.txt'
+
+        with self.assertMailsSent(1):
+            TestMail(context={'a': 'in class context'}) \
+                .send('test@example.com')
+
+        self.assertSimple(mail.outbox[-1],
+                          body=u'Test body.\n\nHas variable in class context.')
+
+        # Class and local context variable.
+        class TestMail(TemplateMail):
+            subject = 'Subject of the e-mail'
+            text_template_name = 'test_mail.txt'
+
+        with self.assertMailsSent(1):
+            TestMail(context={'a': 'in class context'}) \
+                .send('test@example.com',
+                      {'a': 'in local context'})
+
+        self.assertSimple(mail.outbox[-1],
+                          body=u'Test body.\n\nHas variable in local context.')
+
+
 __all__ = (
     'MailTestCase',
+    'TemplateMailTestCase',
 )

@@ -173,8 +173,9 @@ class TemplateMail(Mail):
 
         # Construct the local context.
         local_context = {}
-        for k, v in local_contest.items():
-            local_context[k] = v
+        if self.context:
+            for k, v in self.context.items():
+                local_context[k] = v
         if context:
             for k, v in context.items():
                 local_context[k] = v
