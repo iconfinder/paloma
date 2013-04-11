@@ -14,7 +14,7 @@ To install Paloma, do yourself a favor and don't use anything other than `pip <h
 
 .. code-block:: bash
 
-    $ pip install django_paloma
+    $ pip install django-paloma
 
 Once installed, you also need to add Paloma to your list of ``INSTALLED_APPS`` in your application configuration:
 
