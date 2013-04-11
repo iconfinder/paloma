@@ -172,11 +172,12 @@ class TemplateMail(Mail):
         """
 
         # Construct the local context.
-        local_context = {k: v for k, v in self.context.items()}
-        if not context:
-            context = {}
-        for k, v in context.items():
+        local_context = {}
+        for k, v in local_contest.items():
             local_context[k] = v
+        if context:
+            for k, v in context.items():
+                local_context[k] = v
 
         # Render what needs to be rendered.
         subject = None
