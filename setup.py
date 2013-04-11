@@ -12,7 +12,7 @@ packages = [
 ]
 
 requires = [
-    'Django>=1.3',
+    'Django>=1.4',
 ]
 
 tests_require = [
