@@ -20,7 +20,7 @@ tests_require = [
 ]
 
 setup(
-    name='paloma',
+    name='django-paloma',
     version='1.0.0',
     description='Class based e-mails for Django',
     author='Nick Bruun',
