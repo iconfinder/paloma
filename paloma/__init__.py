@@ -6,8 +6,13 @@ bastardized procedure, which Paloma aims to mitigate.
 """
 
 from django.conf import settings
-from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+
+
+if 'coffin' in settings.INSTALLED_APPS:
+    from coffin.shortcuts import render_to_string
+else:
+    from django.template.loader import render_to_string
 
 
 class Mail(object):
