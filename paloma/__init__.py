@@ -56,7 +56,9 @@ class Mail(object):
              to,
              text_body,
              html_body=None,
-             subject=None):
+             subject=None,
+             tags=None,
+             metadata=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
@@ -82,6 +84,12 @@ class Mail(object):
         # Attach any files.
         for filename, (data, mime_type) in self.attachments.items():
             message.attach(filename, data, mime_type)
+
+        # Optional Mandrill-specific extensions:
+        if tags:
+            message.tags = tags
+        if metadata:
+            message.metadata = metadata
 
         # Send the message.
         message.send()
@@ -169,7 +177,7 @@ class TemplateMail(Mail):
                                            from_email=from_email,
                                            from_name=from_name)
 
-    def send(self, to, context={}):
+    def send(self, to, context={}, tags=None, metadata=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
@@ -201,4 +209,11 @@ class TemplateMail(Mail):
             html_body = render_to_string(self.html_template_name,
                                          local_context).strip()
 
-        super(TemplateMail, self).send(to, text_body, html_body, subject)
+        super(TemplateMail, self).send(
+            to = to,
+            text_body = text_body,
+            html_body = html_body,
+            subject = subject,
+            tags = tags,
+            metadata = metadata,
+        )
