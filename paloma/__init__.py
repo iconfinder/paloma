@@ -177,7 +177,7 @@ class TemplateMail(Mail):
                                            from_email=from_email,
                                            from_name=from_name)
 
-    def send(self, to, context={}, tags=None, metadata=None):
+    def send(self, to, context=None, tags=None, metadata=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
