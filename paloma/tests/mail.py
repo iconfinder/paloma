@@ -1,4 +1,5 @@
 import os
+
 from paloma import Mail, TemplateMail
 from django.core import mail
 from django.test.utils import override_settings
@@ -122,6 +123,42 @@ class MailTestCase(TestCase):
                             'Body of the e-mail',
                             html_body)
         self.assertSimple(mail.outbox[-1], html_body=html_body)
+
+    def test_send__includes_cc_bcc(self):
+        class TestMail(Mail):
+            subject = 'Subject of the e-mail'
+        with self.assertMailsSent(1):
+            TestMail().send('test@example.com', 'Body of the e-mail',
+                            cc=['cc@example.com'], bcc=['bcc@example.com'])
+        message = mail.outbox[-1]
+        self.assertEqual(message.cc, ['cc@example.com'])
+        self.assertEqual(message.bcc, ['bcc@example.com'])
+
+    def test_send__includes_cc_bcc_as_class_vars(self):
+        class TestMail(Mail):
+            subject = 'Subject of the e-mail'
+            cc = ['cc@example.com']
+            bcc = ['bcc@example.com']
+
+        with self.assertMailsSent(1):
+            TestMail().send('test@example.com', 'Body of the e-mail')
+
+        message = mail.outbox[-1]
+        self.assertEqual(message.cc, ['cc@example.com'])
+        self.assertEqual(message.bcc, ['bcc@example.com'])
+
+    def test_send__includes_cc_bcc_as_instance_vars(self):
+        class TestMail(Mail):
+            subject = 'Subject of the e-mail'
+
+        with self.assertMailsSent(1):
+            TestMail(cc=['cc@example.com'], bcc=['bcc@example.com']).send(
+                'test@example.com', 'Body of the e-mail'
+            )
+
+        message = mail.outbox[-1]
+        self.assertEqual(message.cc, ['cc@example.com'])
+        self.assertEqual(message.bcc, ['bcc@example.com'])
 
 
 @override_settings(DEFAULT_FROM_EMAIL='default@example.com',

@@ -27,8 +27,15 @@ class Mail(object):
     from_email = None
     from_name = None
     attachments = None
+    cc = None
+    bcc = None
 
-    def __init__(self, subject=None, from_email=None, from_name=None):
+    def __init__(self,
+                 subject=None,
+                 from_email=None,
+                 from_name=None,
+                 cc=None,
+                 bcc=None):
         """Initialize an e-mail.
 
         :param subject: Subject of the e-mail.
@@ -38,6 +45,10 @@ class Mail(object):
         :param from_name:
             Sender's name. If ``None``, defaults to the ``DEFAULT_FROM_NAME``
             setting if available. Default ``None``.
+        :param cc:
+            List of emails this message should be CC'd to
+        :param bcc:
+            List of emails this message should be BCC'd to
         """
 
         if subject:
@@ -50,6 +61,10 @@ class Mail(object):
             self.from_name = from_name
         elif not self.from_name:
             self.from_name = getattr(settings, 'DEFAULT_FROM_NAME', None)
+        if cc:
+            self.cc = cc
+        if bcc:
+            self.bcc = bcc
         self.attachments = {}
 
     def send(self,
@@ -58,7 +73,9 @@ class Mail(object):
              html_body=None,
              subject=None,
              tags=None,
-             metadata=None):
+             metadata=None,
+             cc=None,
+             bcc=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
@@ -66,6 +83,10 @@ class Mail(object):
         :param html_body: Rich HTML e-mail body.
         :param subject:
             Subject. If not provided, the class instance variable will be used.
+        :param tags: list of mandrill tags
+        :param metadata: dict of mandrill metadata
+        :param cc: list of emails this message should be CC'd to
+        :param bcc: list of emails this message should be BCC'd to
         """
 
         from_combined = '%s <%s>' % (
@@ -73,10 +94,15 @@ class Mail(object):
             self.from_email
         ) if self.from_name else self.from_email
 
+        cc = cc if cc is not None else self.cc
+        bcc = bcc if bcc is not None else self.bcc
+
         message = EmailMultiAlternatives(subject or self.subject,
                                          text_body,
                                          from_combined,
-                                         [to])
+                                         [to],
+                                         cc=cc,
+                                         bcc=bcc)
 
         if html_body:
             message.attach_alternative(html_body, "text/html")
@@ -141,7 +167,9 @@ class TemplateMail(Mail):
                  context=None,
                  subject=None,
                  from_email=None,
-                 from_name=None):
+                 from_name=None,
+                 cc=None,
+                 bcc=None):
         """Initialize a template based e-mail.
 
         :param subject_template_name:
@@ -159,6 +187,10 @@ class TemplateMail(Mail):
         :param from_name:
             Sender's name. If ``None``, defaults to the ``DEFAULT_FROM_NAME``
             setting if available. Default ``None``.
+        :param cc:
+            List of emails this message should be CC'd to
+        :param bcc:
+            List of emails this message should be BCC'd to
         """
 
         if subject_template_name:
@@ -175,9 +207,17 @@ class TemplateMail(Mail):
 
         super(TemplateMail, self).__init__(subject=subject,
                                            from_email=from_email,
-                                           from_name=from_name)
+                                           from_name=from_name,
+                                           cc=cc,
+                                           bcc=bcc)
 
-    def send(self, to, context={}, tags=None, metadata=None):
+    def send(self,
+             to,
+             context=None,
+             tags=None,
+             metadata=None,
+             cc=None,
+             bcc=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
@@ -210,10 +250,12 @@ class TemplateMail(Mail):
                                          local_context).strip()
 
         super(TemplateMail, self).send(
-            to = to,
-            text_body = text_body,
-            html_body = html_body,
-            subject = subject,
-            tags = tags,
-            metadata = metadata,
+            to=to,
+            text_body=text_body,
+            html_body=html_body,
+            subject=subject,
+            tags=tags,
+            metadata=metadata,
+            cc=cc,
+            bcc=bcc
         )

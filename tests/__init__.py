@@ -14,9 +14,14 @@ settings.INSTALLED_APPS = (
     'paloma',
 )
 
+settings.MIDDLEWARE_CLASSES = []
+
 
 def run_tests(settings):
     from django.test.utils import get_runner
+    import django
+    if hasattr(django, 'setup'):
+        django.setup()
     TestRunner = get_runner(settings)
     test_runner = TestRunner(interactive=False)
     failures = test_runner.run_tests(['paloma'])
