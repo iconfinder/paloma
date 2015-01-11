@@ -211,6 +211,17 @@ class TemplateMail(Mail):
                                            cc=cc,
                                            bcc=bcc)
 
+    def render_template(self, template_name, context):
+        """Render a template.
+
+        :param template_name: Template name.
+        :type template_name: str
+        :param context: Context.
+        :returns: the rendered template.
+        """
+
+        return render_to_string(template_name, context)
+
     def send(self,
              to,
              context=None,
@@ -236,18 +247,18 @@ class TemplateMail(Mail):
         # Render what needs to be rendered.
         subject = None
         if self.subject_template_name:
-            subject = ''.join(render_to_string(self.subject_template_name,
-                                               local_context)
+            subject = ''.join(self.render_template(self.subject_template_name,
+                                                   local_context)
                               .strip()
                               .splitlines())
 
-        text_body = render_to_string(self.text_template_name,
-                                     local_context).strip()
+        text_body = self.render_template(self.text_template_name,
+                                         local_context).strip()
 
         html_body = None
         if self.html_template_name:
-            html_body = render_to_string(self.html_template_name,
-                                         local_context).strip()
+            html_body = self.render_template(self.html_template_name,
+                                             local_context).strip()
 
         super(TemplateMail, self).send(
             to=to,
