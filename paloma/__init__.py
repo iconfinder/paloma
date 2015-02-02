@@ -122,21 +122,24 @@ class Mail(object):
 
     def attach_file(self,
                     filename,
-                    path,
+                    path_or_file,
                     mime_type=None):
         """Attach a file to the e-mail.
 
         :param filename: Filename in the e-mail.
-        :param path: Path to the file to attach.
+        :param path_or_file: Path to the file or file object to attach.
         :param mime_type:
             MIME type of the attachment. If ``None``, the MIME type will be
             guessed from the filename.
         """
 
-        with open(path, 'rb') as attachment_file:
-            self.attachments[filename] = (attachment_file.read(),
-                                          mime_type)
-            attachment_file.close()
+        if isinstance(path_or_file, (str, unicode)):
+            with open(path_or_file, 'rb') as attachment_file:
+                self.attachments[filename] = (attachment_file.read(),
+                                              mime_type)
+                attachment_file.close()
+        else:
+            self.attachments[filename] = (path_or_file.read(), mime_type)
 
 
 class TemplateMail(Mail):
