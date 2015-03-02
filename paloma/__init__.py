@@ -29,13 +29,15 @@ class Mail(object):
     attachments = None
     cc = None
     bcc = None
+    headers = None
 
     def __init__(self,
                  subject=None,
                  from_email=None,
                  from_name=None,
                  cc=None,
-                 bcc=None):
+                 bcc=None,
+                 headers=None):
         """Initialize an e-mail.
 
         :param subject: Subject of the e-mail.
@@ -65,6 +67,8 @@ class Mail(object):
             self.cc = cc
         if bcc:
             self.bcc = bcc
+        if headers:
+            self.headers = headers
         self.attachments = {}
 
     def send(self,
@@ -75,7 +79,8 @@ class Mail(object):
              tags=None,
              metadata=None,
              cc=None,
-             bcc=None):
+             bcc=None,
+             headers=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
@@ -96,13 +101,15 @@ class Mail(object):
 
         cc = cc if cc is not None else self.cc
         bcc = bcc if bcc is not None else self.bcc
+        headers = headers if headers is not None else self.headers
 
         message = EmailMultiAlternatives(subject or self.subject,
                                          text_body,
                                          from_combined,
                                          [to],
                                          cc=cc,
-                                         bcc=bcc)
+                                         bcc=bcc,
+                                         headers=headers)
 
         if html_body:
             message.attach_alternative(html_body, "text/html")
@@ -172,7 +179,8 @@ class TemplateMail(Mail):
                  from_email=None,
                  from_name=None,
                  cc=None,
-                 bcc=None):
+                 bcc=None,
+                 headers=None):
         """Initialize a template based e-mail.
 
         :param subject_template_name:
@@ -212,7 +220,8 @@ class TemplateMail(Mail):
                                            from_email=from_email,
                                            from_name=from_name,
                                            cc=cc,
-                                           bcc=bcc)
+                                           bcc=bcc,
+                                           headers=headers)
 
     def render_template(self, template_name, context):
         """Render a template.
@@ -231,7 +240,8 @@ class TemplateMail(Mail):
              tags=None,
              metadata=None,
              cc=None,
-             bcc=None):
+             bcc=None,
+             headers=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
@@ -271,5 +281,6 @@ class TemplateMail(Mail):
             tags=tags,
             metadata=metadata,
             cc=cc,
-            bcc=bcc
+            bcc=bcc,
+            headers=headers
         )
