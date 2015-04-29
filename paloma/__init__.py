@@ -30,6 +30,7 @@ class Mail(object):
     cc = None
     bcc = None
     headers = None
+    important = None
 
     def __init__(self,
                  subject=None,
@@ -37,7 +38,8 @@ class Mail(object):
                  from_name=None,
                  cc=None,
                  bcc=None,
-                 headers=None):
+                 headers=None,
+                 important=None):
         """Initialize an e-mail.
 
         :param subject: Subject of the e-mail.
@@ -69,6 +71,7 @@ class Mail(object):
             self.bcc = bcc
         if headers:
             self.headers = headers
+        self.important = important
         self.attachments = {}
 
     def send(self,
@@ -80,7 +83,8 @@ class Mail(object):
              metadata=None,
              cc=None,
              bcc=None,
-             headers=None):
+             headers=None,
+             important=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
@@ -123,6 +127,11 @@ class Mail(object):
             message.tags = tags
         if metadata:
             message.metadata = metadata
+
+        if important is None:
+            important = self.important
+        if important is not None:
+            message.important = important
 
         # Send the message.
         message.send()
@@ -241,7 +250,8 @@ class TemplateMail(Mail):
              metadata=None,
              cc=None,
              bcc=None,
-             headers=None):
+             headers=None,
+             important=None):
         """Send the e-mail.
 
         :param to: Recipient of the e-mail.
@@ -282,5 +292,6 @@ class TemplateMail(Mail):
             metadata=metadata,
             cc=cc,
             bcc=bcc,
-            headers=headers
+            headers=headers,
+            important=important
         )
