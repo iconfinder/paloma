@@ -71,7 +71,8 @@ class Mail(object):
             self.bcc = bcc
         if headers:
             self.headers = headers
-        self.important = important
+        if important:
+            self.important = important
         self.attachments = {}
 
     def send(self,
@@ -232,7 +233,7 @@ class TemplateMail(Mail):
                                            cc=cc,
                                            bcc=bcc,
                                            headers=headers,
-                                           important=None)
+                                           important=important)
 
     def render_template(self, template_name, context):
         """Render a template.
