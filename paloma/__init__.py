@@ -189,7 +189,8 @@ class TemplateMail(Mail):
                  from_name=None,
                  cc=None,
                  bcc=None,
-                 headers=None):
+                 headers=None,
+                 important=None):
         """Initialize a template based e-mail.
 
         :param subject_template_name:
@@ -230,7 +231,8 @@ class TemplateMail(Mail):
                                            from_name=from_name,
                                            cc=cc,
                                            bcc=bcc,
-                                           headers=headers)
+                                           headers=headers,
+                                           important=None)
 
     def render_template(self, template_name, context):
         """Render a template.
